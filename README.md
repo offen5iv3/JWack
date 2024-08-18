@@ -7,7 +7,10 @@
 - **JWT Decode**: Effortlessly decode JWTs to analyze the header, payload, and signature components.
 - **Scan for None Algorithm**: Detect JWTs that use the `none` algorithm, which can allow attackers to bypass signature verification.
 
+
 ## To be done
+=======
+
 - **JWT Secret Brute Force**: Perform brute-force attacks to crack weak JWT secret keys.
 - **Scan for Unverified Signature Bypass**: Identify scenarios where JWT signatures are not properly verified, leading to potential security bypasses.
 - **Scanning and Exploiting JWK Parameter Injections**: Detect and exploit vulnerabilities in JSON Web Keys (JWK) parameters.
