@@ -10,6 +10,7 @@
 
 ## To be done
 - **Scan for Unverified Signature Bypass**: Identify scenarios where JWT signatures are not properly verified, leading to potential security bypasses.
+- **Edit parameters and add parameters**: Edit the values of paramters in each section and add all the other paramters. 
 - **Scanning and Exploiting JWK Parameter Injections**: Detect and exploit vulnerabilities in JSON Web Keys (JWK) parameters.
 - **Scanning and Exploiting JKU Parameter Injection**: Find and exploit vulnerabilities in the `jku` (JWK Set URL) parameter that can lead to unauthorized key retrieval and JWT manipulation.
 - **Scanning and Exploiting kid Parameter Injection**: Identify and exploit vulnerabilities in the `kid` (Key ID) parameter, allowing for key injection attacks.
