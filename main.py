@@ -95,51 +95,46 @@ def edit_param(token):
             header_json = json.loads(header)
             payload_json = json.loads(payload)
             while True:
-                #print(header_json,"\n", payload_json)
-                jwt_section=input("Section of token you want to edit (header/payload): ")
-                
-                #edit header parameter
+                jwt_section = input("Section of token you want to edit (header/payload): ")
 
-                if jwt_section=="header":
-                    print(header_json)
-                    jwt_parameter=input("Select parameter you want to edit: ")
-                    param_value=input("Enter the value: ")
-                    header_json[jwt_parameter]=param_value
-                    preview=f'{header_json} {payload_json}'
-                    final_token=f'{b64_encode(header_json)}.{b64_encode(payload_json)}'
-                    print(final_token)
-                    
-                    flag = input("Edit more? (yes/no) ").strip().lower()
-                    if flag == "yes" or 'y':
-                        pass
-                    else: 
-                        break
-                    
-                #edit payload parameter
+                if jwt_section == "header":
+                    choice = input("Do you want to edit or add a parameter? (edit/add): ").strip().lower()
+                    if choice == "edit":
+                        print(header_json)
+                        jwt_parameter = input("Select parameter you want to edit: ")
+                        param_value = input("Enter the value: ")
+                        header_json[jwt_parameter] = param_value
+                    elif choice == "add":
+                        header_json = add_param(jwt_section, header_json)
 
-                elif jwt_section=="payload":
-                    print(payload_json)
-                    jwt_parameter=input("Select parameter you want to edit: ")
-                    param_value=input("Enter the value: ")
-                    payload_json[jwt_parameter]=param_value
-                    preview=f'{header_json} {payload_json}'
-                    final_token=f'{b64_encode(header_json)}.{b64_encode(payload_json)}'
-                    print(final_token)
-                    
-                    flag = input("Edit more? (yes/no) ").strip().lower()
-                    if flag == "yes" or 'y':
-                        pass
-                    else: 
-                        break
+                    final_token = f'{b64_encode(header_json)}.{b64_encode(payload_json)}'
+                    print(f"Updated JWT: {final_token}")
+
+                elif jwt_section == "payload":
+                    choice = input("Do you want to edit or add a parameter? (edit/add): ").strip().lower()
+                    if choice == "edit":
+                        print(payload_json)
+                        jwt_parameter = input("Select parameter you want to edit: ")
+                        param_value = input("Enter the value: ")
+                        payload_json[jwt_parameter] = param_value
+                    elif choice == "add":
+                        payload_json = add_param(jwt_section, payload_json)
+
+                    final_token = f'{b64_encode(header_json)}.{b64_encode(payload_json)}'
+                    print(f"Updated JWT: {final_token}")
 
                 else:
-                    print("invalid input")
-                break
-                
+                    print("Invalid input")
+                    continue
+
+                flag = input("Edit more? (yes/no): ").strip().lower()
+                if flag != "yes" and flag != 'y':
+                    break
+
         except json.JSONDecodeError as e:
             print(f"Error decoding JWT header as JSON: {e}")
             return None
-        
+
         return final_token, signature 
     
 def unverified_sign(token):
