@@ -2,13 +2,13 @@
 
 JWack is a powerful security tool designed for interacting with JSON Web Tokens (JWT). It allows users to decode JWTs, perform brute-force attacks on secrets, test for vulnerabilities like alg:none, modify JWT payloads, sign tokens with custom RSA keys and JWK headers, and test injection attacks on the jku and kid parameters. The tool is designed to assist security researchers, penetration testers, and developers in evaluating the security of JWT implementations in web applications.
 ## Features
-**JWT Decode:** Decodes the JWT header, payload, and signature for analysis.
-**JWT Secret Bruteforce:** Brute forces the secret used to sign the JWT using a wordlist.
-**alg Attack:** Exploits weak JWT implementations where the alg field can be tampered with.
-**Parameter Editing:** Modify or add parameters to the JWT header and payload.
-**Unverified Signature Bypass:** Test the system’s vulnerability to unsigned JWTs by creating a new token with altered claims while keeping the signature intact.
-**JWK (JSON Web Key) Support:** Generate an RSA key pair, convert the public key into JWK format, and sign the JWT with the RSA private key.
-**JKU & kid Parameter Injection (Coming Soon):** Exploit potential vulnerabilities in JWT implementations by injecting malicious values into the JKU and kid parameters. (Currently under development).
+1. **JWT Decode:** Decodes the JWT header, payload, and signature for analysis.
+2. **JWT Secret Bruteforce:** Brute forces the secret used to sign the JWT using a wordlist.
+3. **alg Attack:** Exploits weak JWT implementations where the alg field can be tampered with.
+4. **Parameter Editing:** Modify or add parameters to the JWT header and payload.
+5. **Unverified Signature Bypass:** Test the system’s vulnerability to unsigned JWTs by creating a new token with altered claims while keeping the signature intact.
+6. **JWK (JSON Web Key) Support:** Generate an RSA key pair, convert the public key into JWK format, and sign the JWT with the RSA private key.
+7. **JKU & kid Parameter Injection (Coming Soon):** Exploit potential vulnerabilities in JWT implementations by injecting malicious values into the JKU and kid parameters. (Currently under development).
 ## Usage
 The tool can be run from the command line using various options and flags. Below is a detailed guide on each command.
 ### Command Line Options
