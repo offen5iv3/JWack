@@ -164,12 +164,8 @@ def edit_param(token):
         except json.JSONDecodeError as e:
             print(f"Error decoding JWT header as JSON: {e}")
             return None
-        ft=final_token+'.'+signature
-        return ft 
 
-    # If header or payload is None, return None
-    return None
-
+        return final_token, signature 
     
 def unverified_sign(token):
     new_token, signature=edit_param(token)
@@ -178,7 +174,6 @@ def unverified_sign(token):
 
 def generate_rsa_jwk(token):
     # Generate RSA key pair
-    kid=0
     private_key = rsa.generate_private_key(
         public_exponent=65537,
         key_size=2048,
@@ -208,12 +203,10 @@ def generate_rsa_jwk(token):
 
 
 def sign_with_jwk(token):
-    new_token=edit_param(token)
-    print(new_token)
-    jwk, private_key = generate_rsa_jwk(new_token)
+    jwk, private_key = generate_rsa_jwk(token)
     print("Generated JWK: ", json.dumps(jwk, indent=4))
 
-    header, payload, _ = jwt_decode(new_token)
+    header, payload, _ = jwt_decode(token)
     if header and payload:
         try:
             # Modify header to include jwk parameter
