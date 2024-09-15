@@ -1,0 +1,5 @@
+pybase64
+argparse
+colorama
+pycrypto 
+cryptography

