@@ -300,6 +300,7 @@ def sign_with_jwk_jku(token):
             return None
 
 
+
 def main():
 
     parser = argparse.ArgumentParser(description="JWT secret brute-forcing tool.")
@@ -313,7 +314,6 @@ def main():
     parser.add_argument("-us", "--unverified", action="store_true", help="Generate token with alterred values with same sigature to test unverified signature bypass")
     parser.add_argument("-jwk", "--jwk", action="store_true", help="Generate JWK and sign JWT with the generated key.")
     parser.add_argument("-jku", action="store_true", help="Inject 'jku' header and sign JWT with a user-provided JWK Set URL.")
-
     args = parser.parse_args()
     file_path = args.file
     token = args.token
