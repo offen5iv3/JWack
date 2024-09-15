@@ -30,7 +30,7 @@ The tool can be run from the command line using various options and flags. Below
 
 -jwk, --jwk Generate a JWK key and sign the JWT.
 
--jku, --jku Perform JKU header injection (Coming Soon).
+-jku, --jku Perform JKU header injection.
 
 -kid, --kid Inject malicious `kid` parameter values (Coming Soon).
 ```
@@ -53,7 +53,7 @@ This will modify the JWT claims but retain the original signature to test if the
 ### 6. **`Generate and Sign JWT with JWK`**
 `python jwack.py -t <JWT> --jwk`
 This generates an RSA key pair, converts the public key to a JWK, and signs the token with the RSA private key.
-### 7. **`JKU Header Injection (Coming Soon)`**
+### 7. **`JKU Header Injection`**
 This feature will allow users to inject a malicious URL in the `jku` header, which could be used to retrieve a malicious key set.
 `python jwack.py -t <JWT> --jku`
 ### 8. **`kid Parameter Injection (Coming Soon)`**
