@@ -106,12 +106,26 @@ def alg_none(token):
             print(f"Error decoding JWT header as JSON: {e}")
             return None
 
+def parse_param_value(param_value):
+    # Check if the value is enclosed in quotes to treat it as a string
+    if param_value.startswith('"') and param_value.endswith('"'):
+        return param_value[1:-1]
+    else:
+        try:
+            return int(param_value)
+        except ValueError:
+            try:
+                return float(param_value)
+            except ValueError:
+                return param_value
+
 def add_param(jwt_section, json_data):
     try:
         print(f"Current {jwt_section}: {json_data}")
         jwt_parameter = input(f"Enter the new parameter name to add in {jwt_section}: ")
         param_value = input(f"Enter the value for {jwt_parameter}: ")
-        json_data[jwt_parameter] = param_value
+        # Parse param_value based on whether it's in quotes
+        json_data[jwt_parameter] = parse_param_value(param_value)
         return json_data
 
     except Exception as e:
@@ -130,10 +144,10 @@ def edit_param(token):
                 if jwt_section == "header":
                     choice = input("Do you want to edit or add a parameter? (edit/add): ").strip().lower()
                     if choice == "edit":
-                        print(Fore.GREEN + header_json)
+                        print(Fore.GREEN + str(header_json))
                         jwt_parameter = input(Fore.RED+"Select parameter you want to edit: ")
                         param_value = input("Enter the value: ")
-                        header_json[jwt_parameter] = param_value
+                        header_json[jwt_parameter] = parse_param_value(param_value)
                     elif choice == "add":
                         header_json = add_param(jwt_section, header_json)
 
@@ -148,7 +162,7 @@ def edit_param(token):
                         print("======================")
                         jwt_parameter = input(Fore.RED + "Select parameter you want to edit: ")
                         param_value = input(Fore.RED + "Enter the value: ")
-                        payload_json[jwt_parameter] = param_value
+                        payload_json[jwt_parameter] = parse_param_value(param_value)
                     elif choice == "add":
                         payload_json = add_param(jwt_section, payload_json)
 
@@ -156,7 +170,6 @@ def edit_param(token):
                     print("======================")
                     print(Fore.GREEN + f"Updated JWT: {final_token}")
                     print("======================")
-
 
                 else:
                     print(Fore.GREEN + "Invalid input")
@@ -172,8 +185,8 @@ def edit_param(token):
         ft=final_token+'.'+signature
         return ft 
 
-    # If header or payload is None, return None
     return None
+
 
     
 def unverified_sign(token):
